@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MyWebApplication.Db;
 
 namespace WebApplication.Api.Controllers
 {
@@ -11,23 +12,24 @@ namespace WebApplication.Api.Controllers
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
+        private readonly WeatherDatabaseContext _weatherDatabaseContext;
         private readonly ILogger<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, WeatherDatabaseContext weatherDatabaseContext)
         {
+            _weatherDatabaseContext = weatherDatabaseContext;
             _logger = logger;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+            return _weatherDatabaseContext.WeatherForecasts.Select(x=> new WeatherForecast() 
+            { 
+                Date= x.Date, 
+                Summary = x.Summary, 
+                TemperatureC = x.TemperatureC
+            }).ToList();
         }
     }
 }
